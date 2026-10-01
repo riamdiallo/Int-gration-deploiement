@@ -1,43 +1,48 @@
-name: Exercice 1 - Valider un projet
+name: CI
 
 on:
-  push:[cite: 1]
+  push:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Récupérer le code[cite: 1]
+      # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Installer Node.js[cite: 1]
+      # 2. Installer Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3. Mettre en place le cache npm[cite: 1]
+      # 3. Mettre en place le cache npm
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # 4. Installer les dépendances[cite: 1]
+      # 4. Installer les dépendances
       - name: Install dependencies
         run: npm ci
 
-      # 5. Lancer les tests[cite: 1]
+      # 5. Lancer les tests
       - name: Run tests
         run: npm test
 
-      # 6. Écrire le statut du job et la ref du commit dans le résumé[cite: 1]
-      - name: Generate summary
+      # 6. Écrire le résumé (même si les tests échouent)
+      - name: Write job summary
         if: always()
         run: |
-          echo "### Statut du Job : ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "Ref du commit : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Résultat de la CI" >> $GITHUB_STEP_SUMMARY
+          echo "Statut : ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "Commit : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Ref : ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
